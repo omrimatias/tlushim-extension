@@ -1,4 +1,4 @@
-Tlushim = (function() {
+const Tlushim = (function() {
     let updatedTimestamp = 0;
     let hoursSupposedToBe = 0;
     let totalTimeInMinutes = 0;
@@ -9,14 +9,14 @@ Tlushim = (function() {
         updatedTimestamp = getUpdatedTimeStamp();
 
         document.querySelectorAll("table.atnd tr:not(.total)").forEach((tr, index) => {
-            const date = getText(tr.querySelector("td.atnd:nth-child(1)"));
+            const date = getText(tr.querySelector("td:nth-child(1)"));
             const enterTime = tr.querySelector("td:nth-child(3)");
             const exitTime = tr.querySelector("td:nth-child(4)");
             const optionType = getText(tr.querySelector("td.atnd_type select option"));
             const shiftType = getText(tr.querySelector('td.atnd:nth-child(20)'));
             const hourInRow = getText(tr.querySelector('td.atnd:nth-child(21)'));
 
-            if (!isValidDate(date) || isInvalidShiftType(shiftType)) {
+            if (!isValidDate(date) || isInvalidShiftType(shiftType, optionType) || hourInRow === null) {
                 return;
             }
 
@@ -55,7 +55,10 @@ Tlushim = (function() {
         const date = caption.match(regex);
         const dateSeparated = date[0].split('/');
 
-        return new Date(dateSeparated[2], dateSeparated[1], dateSeparated[0]).getTime();
+        // Date uses a month -1 =[
+        const month = (Number(dateSeparated[1]) - 1);
+
+        return (new Date('20' + dateSeparated[2], month, dateSeparated[0])).getTime();
     }
 
     function isValidDate(date) {
@@ -98,8 +101,8 @@ Tlushim = (function() {
         return (minutesDiff + (hoursDiff * 60));
     }
 
-    function isInvalidShiftType(shiftType) {
-        return (shiftType === '');
+    function isInvalidShiftType(shiftType, optionType) {
+        return (shiftType === '' && ['מילואים', 'מחלה', 'חופשה'].indexOf(optionType) === -1);
     }
 
     function getText(str) {
