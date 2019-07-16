@@ -2,6 +2,7 @@ const Tlushim = (function() {
     let updatedTimestamp = 0;
     let hoursSupposedToBe = 0;
     let totalTimeInMinutes = 0;
+    const ONE_HOUR_IN_MINUTES = 60;
 
     function install() {
         let data = [];
@@ -13,10 +14,15 @@ const Tlushim = (function() {
             const enterTime = tr.querySelector("td:nth-child(3)");
             const exitTime = tr.querySelector("td:nth-child(4)");
             const optionType = getText(tr.querySelector("td.atnd_type select option"));
-            const shiftType = getText(tr.querySelector('td.atnd:nth-child(20)'));
-            const hourInRow = getText(tr.querySelector('td.atnd:nth-child(21)'));
+            const shiftType = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('משמרת') + ')'));
+            const hourInRow = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('תקן') + ')'));
 
-            if (!isValidDate(date) || isInvalidShiftType(shiftType, optionType) || hourInRow === null) {
+            if (!isValidDate(date) || isInvalidShiftType(shiftType) || hourInRow === null) {
+                return;
+            }
+
+            if (isOutOfWork(shiftType, optionType)) {
+                totalTimeInMinutes += 9 * ONE_HOUR_IN_MINUTES;
                 return;
             }
 
@@ -40,10 +46,26 @@ const Tlushim = (function() {
     }
 
     function summarizeMinutes(enterTime, exitTime) {
-        const enterHours = getValue(enterTime.querySelector('input:nth-child(1)'));
-        const exitHours = getValue(exitTime.querySelector('input:nth-child(1)'));
-        let enterMinutes = getValue(enterTime.querySelector('input:nth-child(2)'));
-        let exitMinutes = getValue(exitTime.querySelector('input:nth-child(2)'));
+
+        let enterHoursEl = enterTime.querySelector('input:nth-child(1)');
+        let exitHoursEl = exitTime.querySelector('input:nth-child(1)');
+        let enterMinutesEl = enterTime.querySelector('input:nth-child(2)');
+        let exitMinutesEl = exitTime.querySelector('input:nth-child(2)');
+
+        let enterHours = getValue(enterHoursEl);
+        let exitHours = getValue(exitHoursEl);
+        let enterMinutes = getValue(enterMinutesEl);
+        let exitMinutes = getValue(exitMinutesEl);
+
+        if (!enterHours || !enterMinutes || !exitHours || !exitMinutes) {
+            const separatedEnterHours = getText(enterTime).split(':');
+            const separatedExitHours = getText(exitTime).split(':');
+
+            enterHours = separatedEnterHours[0];
+            enterMinutes = separatedEnterHours[1];
+            exitHours = separatedExitHours[0];
+            exitMinutes = separatedExitHours[1];
+        }
 
         if (enterHours === '' || enterMinutes === '' || exitHours === '' || exitMinutes === '') return 0;
 
@@ -74,15 +96,15 @@ const Tlushim = (function() {
         return (updatedTimestamp >= new Date('20' + dateSeparated[2], month, dateSeparated[0]).getTime());
     }
 
-    function isValidOptionType(optionType) {
-        return !(optionType === '' || optionType !== 'רגיל');
-    }
-
     function minutesToTime(minutes) {
         const realMinutes = minutes % 60;
         const hours = parseInt((minutes - realMinutes) / 60);
 
         return ((hours < 10) ? '0' + hours : hours) + ':' + ((realMinutes < 10) ? '0' + realMinutes : realMinutes);
+    }
+
+    function isInvalidShiftType(shiftType) {
+        return (shiftType === '');
     }
 
     function getTotalMinutesInRow(enterHours, exitHours, enterMinutes, exitMinutes) {
@@ -95,8 +117,8 @@ const Tlushim = (function() {
         return (minutesDiff + (hoursDiff * 60));
     }
 
-    function isInvalidShiftType(shiftType, optionType) {
-        return (shiftType === '' && ['מילואים', 'מחלה', 'חופשה'].indexOf(optionType) === -1);
+    function isOutOfWork(shiftType, optionType) {
+        return (shiftType !== '' && ['מילואים', 'מחלה', 'חופשה'].indexOf(optionType) !== -1);
     }
 
     function getText(str) {
@@ -105,6 +127,17 @@ const Tlushim = (function() {
 
     function getValue(str) {
         return (str) ? str.value.trim() : str;
+    }
+
+    function getColumnIndexByText(text) {
+        let realIndex = 0;
+        document.querySelectorAll('table.atnd tr.atnd:first-child th').forEach((th, index) => {
+            if (th.innerText === text) {
+                realIndex = index;
+            }
+        });
+
+        return (realIndex + 1);
     }
 
     return {
