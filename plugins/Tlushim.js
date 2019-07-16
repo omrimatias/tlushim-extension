@@ -43,6 +43,19 @@ const Tlushim = (function() {
 
         console.table(data);
         console.table([['hoursSupposedToBe', 'actualTime'], [hoursSupposedToBe, minutesToTime(totalTimeInMinutes)]]);
+        printTime();
+    }
+
+    function printTime() {
+        const time = minutesToTime(totalTimeInMinutes);
+        if (time.hours < hoursSupposedToBe) {
+            // Bad boy!
+            console.log("חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות");
+        }
+        else {
+            // Great!
+            console.log("יש לך " + (time.hours - hoursSupposedToBe) + " שעות עודף!");
+        }
     }
 
     function summarizeMinutes(enterTime, exitTime) {
@@ -93,14 +106,18 @@ const Tlushim = (function() {
         // Date uses a month -1 =[
         const month = (Number(dateSeparated[1]) - 1);
 
-        return (updatedTimestamp >= new Date('20' + dateSeparated[2], month, dateSeparated[0]).getTime());
+        return (updatedTimestamp > new Date('20' + dateSeparated[2], month, dateSeparated[0]).getTime());
     }
 
     function minutesToTime(minutes) {
         const realMinutes = minutes % 60;
         const hours = parseInt((minutes - realMinutes) / 60);
 
-        return ((hours < 10) ? '0' + hours : hours) + ':' + ((realMinutes < 10) ? '0' + realMinutes : realMinutes);
+        return {
+            hours: hours,
+            minutes: realMinutes
+        }
+        // return ((hours < 10) ? '0' + hours : hours) + ':' + ((realMinutes < 10) ? '0' + realMinutes : realMinutes);
     }
 
     function isInvalidShiftType(shiftType) {
