@@ -23,6 +23,7 @@ const Tlushim = (function() {
             totalTimeInMinutes += summarizeMinutes(enterTime, exitTime);
             hoursSupposedToBe += Number(hourInRow);
 
+            // Test purposes
             if(index === 3) {
                 window.$tr = tr;
                 window.$optionType = optionType;
@@ -79,9 +80,9 @@ const Tlushim = (function() {
 
     function minutesToTime(minutes) {
         const realMinutes = minutes % 60;
-        const hours = Math.ceil((minutes) / 60);
+        const hours = parseInt((minutes - realMinutes) / 60);
 
-        return ((hours < 10) ? '0' + hours : hours) + ':' + realMinutes;
+        return ((hours < 10) ? '0' + hours : hours) + ':' + ((realMinutes < 10) ? '0' + realMinutes : realMinutes);
     }
 
     function getTotalMinutesInRow(enterHours, exitHours, enterMinutes, exitMinutes) {
@@ -89,14 +90,7 @@ const Tlushim = (function() {
         exitMinutes = Number(exitMinutes);
 
         const hoursDiff = Number(exitHours) - Number(enterHours);
-        let minutesDiff;
-
-        if (exitMinutes >= enterMinutes) {
-            minutesDiff = exitMinutes - enterMinutes;
-        }
-        else {
-            minutesDiff = enterMinutes - exitMinutes;
-        }
+        const minutesDiff = exitMinutes - enterMinutes;
 
         return (minutesDiff + (hoursDiff * 60));
     }
