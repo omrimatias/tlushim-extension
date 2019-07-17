@@ -5,7 +5,7 @@ const Tlushim = (function() {
     const ONE_HOUR_IN_MINUTES = 60;
 
     function install() {
-        let data = [];
+        if (!isHoursTableExists()) return;
 
         updatedTimestamp = getUpdatedTimeStamp();
 
@@ -168,6 +168,10 @@ const Tlushim = (function() {
         });
 
         return (realIndex + 1);
+    }
+
+    function isHoursTableExists() {
+        return (document.querySelector("table.atnd"));
     }
 
     return {
