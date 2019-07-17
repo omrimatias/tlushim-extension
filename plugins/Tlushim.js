@@ -13,7 +13,7 @@ const Tlushim = (function() {
             const date = getText(tr.querySelector("td:nth-child(1)"));
             const enterTime = tr.querySelector("td:nth-child(3)");
             const exitTime = tr.querySelector("td:nth-child(4)");
-            const optionType = getText(tr.querySelector("td.atnd_type select option"));
+            const optionType = getText(tr.querySelector("td.atnd_type select option[selected]"));
             const shiftType = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('משמרת') + ')'));
             const hourInRow = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('תקן') + ')'));
 
@@ -22,7 +22,7 @@ const Tlushim = (function() {
             }
 
             if (isOutOfWork(shiftType, optionType)) {
-                totalTimeInMinutes += 9 * ONE_HOUR_IN_MINUTES;
+                totalTimeInMinutes += hourInRow * ONE_HOUR_IN_MINUTES;
                 return;
             }
 
@@ -30,7 +30,7 @@ const Tlushim = (function() {
             hoursSupposedToBe += Number(hourInRow);
 
             // Test purposes
-            if(index === 3) {
+            if(index === 5) {
                 window.$tr = tr;
                 window.$optionType = optionType;
                 window.$enterTime = enterTime;
@@ -38,7 +38,6 @@ const Tlushim = (function() {
             }
 
             data.push([date, optionType, shiftType, hourInRow]);
-            // console.log(date, optionType, shiftType, hourInRow);
         });
 
         console.table(data);
@@ -48,8 +47,14 @@ const Tlushim = (function() {
 
     function printTime() {
         const time = minutesToTime(totalTimeInMinutes);
+        const div = document.createElement('div');
+        const span = document.createElement('span');
+
+        div.style.cssText = 'border: 1px solid; width: 80%; margin: 10px auto; line-height: 50px; font-size: 14px;font-family: Arial;';
 
         if (time.hours < hoursSupposedToBe) {
+            div.style.cssText += 'color: #D8000C; background-color: #FFBABA;';
+
             if (time.hours > 0) {
                 ++time.hours;
                 time.minutes = ONE_HOUR_IN_MINUTES - time.minutes;
@@ -57,11 +62,18 @@ const Tlushim = (function() {
 
             // Bad boy!
             console.log("חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות");
+            span.innerText = "חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות";
         }
         else {
+            div.style.cssText += 'color: #4F8A10; background-color: #DFF2BF;';
+
             // Great!
             console.log("יש לך " + (time.hours - hoursSupposedToBe) + " שעות עודף!");
+            span.innerText = "יש לך " + (time.hours - hoursSupposedToBe) + " שעות עודף!";
         }
+
+        div.appendChild(span);
+        document.querySelector('div.atnd form').insertBefore(div, document.querySelector('table.atnd'));
     }
 
     function summarizeMinutes(enterTime, exitTime) {
