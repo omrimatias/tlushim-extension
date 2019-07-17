@@ -1,4 +1,4 @@
-Tlushim = (function() {
+const Tlushim = (function() {
     let updatedTimestamp = 0;
     let hoursSupposedToBe = 0;
     let totalTimeInMinutes = 0;
@@ -173,4 +173,4 @@ Tlushim = (function() {
     return {
         install: install
     }
-})().install();
+})();
