@@ -1,4 +1,4 @@
-const Tlushim = (function() {
+Tlushim = (function() {
     let updatedTimestamp = 0;
     let hoursSupposedToBe = 0;
     let totalTimeInMinutes = 0;
@@ -29,19 +29,11 @@ const Tlushim = (function() {
             totalTimeInMinutes += summarizeMinutes(enterTime, exitTime);
             hoursSupposedToBe += Number(hourInRow);
 
-            // Test purposes
-            if(index === 5) {
-                window.$tr = tr;
-                window.$optionType = optionType;
-                window.$enterTime = enterTime;
-                window.$exitTime = exitTime;
-            }
-
-            data.push([date, optionType, shiftType, hourInRow]);
+            // data.push([date, optionType, shiftType, hourInRow]);
         });
 
-        console.table(data);
-        console.table([['hoursSupposedToBe', 'actualTime'], [hoursSupposedToBe, minutesToTime(totalTimeInMinutes)]]);
+        // console.table(data);
+        // console.table([['hoursSupposedToBe', 'actualTime'], [hoursSupposedToBe, minutesToTime(totalTimeInMinutes)]]);
         printTime();
     }
 
@@ -50,6 +42,9 @@ const Tlushim = (function() {
         const div = document.createElement('div');
         const span = document.createElement('span');
 
+        if (document.querySelector('.om_message')) return;
+
+        div.classList.add('om_message');
         div.style.cssText = 'border: 1px solid; width: 80%; margin: 10px auto; line-height: 50px; font-size: 14px;font-family: Arial;';
 
         if (time.hours < hoursSupposedToBe) {
@@ -61,15 +56,15 @@ const Tlushim = (function() {
             }
 
             // Bad boy!
-            console.log("חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות");
+            // console.log("חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות");
             span.innerText = "חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות";
         }
         else {
             div.style.cssText += 'color: #4F8A10; background-color: #DFF2BF;';
 
             // Great!
-            console.log("יש לך " + (time.hours - hoursSupposedToBe) + " שעות עודף!");
-            span.innerText = "יש לך " + (time.hours - hoursSupposedToBe) + " שעות עודף!";
+            // console.log("יש לך " + (time.hours - hoursSupposedToBe) + " שעות עודף!");
+            span.innerText = "יש לך " + (-1 * (hoursSupposedToBe - time.hours)) + " שעות ו-" + time.minutes + " דקות עודף!";
         }
 
         div.appendChild(span);
