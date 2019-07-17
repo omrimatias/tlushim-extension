@@ -48,7 +48,13 @@ const Tlushim = (function() {
 
     function printTime() {
         const time = minutesToTime(totalTimeInMinutes);
+
         if (time.hours < hoursSupposedToBe) {
+            if (time.hours > 0) {
+                ++time.hours;
+                time.minutes = ONE_HOUR_IN_MINUTES - time.minutes;
+            }
+
             // Bad boy!
             console.log("חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות");
         }
