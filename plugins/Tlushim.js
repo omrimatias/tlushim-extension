@@ -21,19 +21,16 @@ const Tlushim = (function() {
                 return;
             }
 
+            hoursSupposedToBe += Number(hourInRow);
+
             if (isOutOfWork(shiftType, optionType)) {
-                totalTimeInMinutes += hourInRow * ONE_HOUR_IN_MINUTES;
+                totalTimeInMinutes += (hourInRow * ONE_HOUR_IN_MINUTES);
                 return;
             }
 
             totalTimeInMinutes += summarizeMinutes(enterTime, exitTime);
-            hoursSupposedToBe += Number(hourInRow);
-
-            // data.push([date, optionType, shiftType, hourInRow]);
         });
 
-        // console.table(data);
-        // console.table([['hoursSupposedToBe', 'actualTime'], [hoursSupposedToBe, minutesToTime(totalTimeInMinutes)]]);
         printTime();
     }
 
