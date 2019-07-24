@@ -9,12 +9,12 @@ const Tlushim = (function() {
 
         updatedTimestamp = getUpdatedTimeStamp();
 
-        document.querySelectorAll("table.atnd tr:not(.total)").forEach((tr, index) => {
+        document.querySelectorAll("table.atnd tr:not(.total)").forEach((tr) => {
             const date = getText(tr.querySelector("td:nth-child(1)"));
             const enterTime = tr.querySelector("td:nth-child(3)");
             const exitTime = tr.querySelector("td:nth-child(4)");
-            const optionType = getText(tr.querySelector("td.atnd_type select option[selected]"));
-            const shiftType = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('משמרת') + ')'));
+            const optionType = getOptionType(tr, getColumnIndexByText('סוג', true));
+            const shiftType = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('משמרת', true) + ')'));
             const hourInRow = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('תקן') + ')'));
 
             if (!isValidDate(date) || isInvalidShiftType(shiftType) || hourInRow === null) {
@@ -32,6 +32,16 @@ const Tlushim = (function() {
         });
 
         printTime();
+    }
+
+    function getOptionType(tr, tdIndex) {
+        let optionType = tr.querySelector('td.atnd_type select option[selected]');
+
+        if (!optionType) {
+            optionType = tr.querySelector('td:nth-child(' + tdIndex + ')');
+        }
+
+        return getText(optionType);
     }
 
     function printTime() {
@@ -144,7 +154,7 @@ const Tlushim = (function() {
     }
 
     function isInvalidShiftType(shiftType) {
-        return (shiftType === '');
+        return (shiftType === '' || shiftType === 'חג');
     }
 
     function getTotalMinutesInRow(enterHours, exitHours, enterMinutes, exitMinutes) {
@@ -169,11 +179,13 @@ const Tlushim = (function() {
         return (str) ? str.value.trim() : str;
     }
 
-    function getColumnIndexByText(text) {
+    function getColumnIndexByText(text, getFirst) {
         let realIndex = 0;
+        let already = false;
         document.querySelectorAll('table.atnd tr.atnd:first-child th').forEach((th, index) => {
-            if (th.innerText === text) {
+            if (th.innerText === text && (!getFirst || (getFirst && !already))) {
                 realIndex = index;
+                already = true;
             }
         });
 
