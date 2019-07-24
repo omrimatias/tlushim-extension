@@ -4,6 +4,11 @@ const Tlushim = (function() {
     let totalTimeInMinutes = 0;
     const ONE_HOUR_IN_MINUTES = 60;
 
+    /**
+     * Starting point of the app.
+     * Here it runs in a loop over all the lines in the table
+     * and uses helping functions to parse and summarize the minutes calculation.
+     */
     function install() {
         if (!isHoursTableExists()) return;
 
@@ -34,6 +39,14 @@ const Tlushim = (function() {
         printTime();
     }
 
+    /**
+     * Returns the optionType text,
+     * also supports previous months
+     *
+     * @param tr
+     * @param tdIndex
+     * @returns {*}
+     */
     function getOptionType(tr, tdIndex) {
         let optionType = tr.querySelector('td.atnd_type select option[selected]');
 
@@ -44,6 +57,9 @@ const Tlushim = (function() {
         return getText(optionType);
     }
 
+    /**
+     * Print function creates the colored div and puts the data inside
+     */
     function printTime() {
         const time = minutesToTime(totalTimeInMinutes);
         const div = document.createElement('div');
@@ -78,6 +94,14 @@ const Tlushim = (function() {
         document.querySelector('div.atnd form').insertBefore(div, document.querySelector('table.atnd'));
     }
 
+    /**
+     * It extracts the time from a string or an input
+     * and summarizes the minutes of all the lines in the table
+     *
+     * @param enterTime
+     * @param exitTime
+     * @returns {number|*}
+     */
     function summarizeMinutes(enterTime, exitTime) {
 
         let enterHoursEl = enterTime.querySelector('input:nth-child(1)');
@@ -109,6 +133,12 @@ const Tlushim = (function() {
         return getTotalMinutesInRow(enterHours, exitHours, enterMinutes, exitMinutes);
     }
 
+    /**
+     * Extracts the time from a string and split it to hours and minutes
+     *
+     * @param time
+     * @returns {{hours: string, minutes: string}}
+     */
     function extractTimeFromString(time) {
         const separatedTime = getText(time).split(':');
 
@@ -118,6 +148,11 @@ const Tlushim = (function() {
         }
     }
 
+    /**
+     * getUpdatedTimeStamp helps to retrieve the last updated date
+     *
+     * @returns {number}
+     */
     function getUpdatedTimeStamp() {
         const caption = document.querySelector('table.atnd caption').innerText;
         const regex = /(\d{2}\/\d{2}\/\d{2})/;
@@ -130,6 +165,12 @@ const Tlushim = (function() {
         return (new Date('20' + dateSeparated[2], month, dateSeparated[0])).getTime();
     }
 
+    /**
+     * isValidDate checks if the given date is valid and in the past
+     *
+     * @param date
+     * @returns {boolean}
+     */
     function isValidDate(date) {
         if (!date) return;
 
@@ -142,6 +183,12 @@ const Tlushim = (function() {
         return (updatedTimestamp > new Date('20' + dateSeparated[2], month, dateSeparated[0]).getTime());
     }
 
+    /**
+     * Here it gets a minutes number and returns separated hours and minutes object
+     *
+     * @param minutes
+     * @returns {{hours: number, minutes: number}}
+     */
     function minutesToTime(minutes) {
         const realMinutes = minutes % 60;
         const hours = parseInt((minutes - realMinutes) / 60);
@@ -150,13 +197,27 @@ const Tlushim = (function() {
             hours: hours,
             minutes: realMinutes
         }
-        // return ((hours < 10) ? '0' + hours : hours) + ':' + ((realMinutes < 10) ? '0' + realMinutes : realMinutes);
     }
 
+    /**
+     * Check if this shift is a regular shift
+     *
+     * @param shiftType
+     * @returns {boolean}
+     */
     function isInvalidShiftType(shiftType) {
         return (shiftType === '' || shiftType === 'חג');
     }
 
+    /**
+     * getTotalMinutesInRow calculates the enter and exit time in the row
+     *
+     * @param enterHours
+     * @param exitHours
+     * @param enterMinutes
+     * @param exitMinutes
+     * @returns {number}
+     */
     function getTotalMinutesInRow(enterHours, exitHours, enterMinutes, exitMinutes) {
         enterMinutes = Number(enterMinutes);
         exitMinutes = Number(exitMinutes);
@@ -167,18 +228,44 @@ const Tlushim = (function() {
         return (minutesDiff + (hoursDiff * 60));
     }
 
+    /**
+     * Checks if the line is a "out of work" line
+     *
+     * @param shiftType
+     * @param optionType
+     * @returns {boolean}
+     */
     function isOutOfWork(shiftType, optionType) {
         return (shiftType !== '' && ['מילואים', 'מחלה', 'חופשה'].indexOf(optionType) !== -1);
     }
 
+    /**
+     * Helps to get a text and trim it
+     *
+     * @param str
+     * @returns {string}
+     */
     function getText(str) {
         return (str) ? str.innerText.trim() : str;
     }
 
+    /**
+     * Helps to get a value and trim it
+     *
+     * @param str
+     * @returns {string}
+     */
     function getValue(str) {
         return (str) ? str.value.trim() : str;
     }
 
+    /**
+     * It helps to get the index of the corresponding text
+     *
+     * @param text
+     * @param getFirst
+     * @returns {number}
+     */
     function getColumnIndexByText(text, getFirst) {
         let realIndex = 0;
         let already = false;
@@ -192,6 +279,11 @@ const Tlushim = (function() {
         return (realIndex + 1);
     }
 
+    /**
+     * Checks if the table of hours is shown
+     *
+     * @returns {Element}
+     */
     function isHoursTableExists() {
         return (document.querySelector("table.atnd"));
     }
