@@ -80,19 +80,32 @@ const Tlushim = (function() {
         let enterMinutes = getValue(enterMinutesEl);
         let exitMinutes = getValue(exitMinutesEl);
 
-        if (!enterHours || !enterMinutes || !exitHours || !exitMinutes) {
-            const separatedEnterHours = getText(enterTime).split(':');
-            const separatedExitHours = getText(exitTime).split(':');
+        if (!enterHours || !enterMinutes) {
+            const separatedEnterHours = extractTimeFromString(enterTime);
 
-            enterHours = separatedEnterHours[0];
-            enterMinutes = separatedEnterHours[1];
-            exitHours = separatedExitHours[0];
-            exitMinutes = separatedExitHours[1];
+            enterHours = separatedEnterHours.hours;
+            enterMinutes = separatedEnterHours.minutes;
+        }
+
+        if (!exitHours || !exitMinutes) {
+            const separatedExitHours = extractTimeFromString(exitTime);
+
+            exitHours = separatedExitHours.hours;
+            exitMinutes = separatedExitHours.minutes;
         }
 
         if (enterHours === '' || enterMinutes === '' || exitHours === '' || exitMinutes === '') return 0;
 
         return getTotalMinutesInRow(enterHours, exitHours, enterMinutes, exitMinutes);
+    }
+
+    function extractTimeFromString(time) {
+        const separatedTime = getText(time).split(':');
+
+        return {
+            hours: separatedTime[0],
+            minutes: separatedTime[1]
+        }
     }
 
     function getUpdatedTimeStamp() {
