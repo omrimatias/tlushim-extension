@@ -22,7 +22,7 @@ const Tlushim = (function() {
             const shiftType = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('משמרת', true) + ')'));
             const hourInRow = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('תקן') + ')'));
 
-            if (!isValidDate(date) || isInvalidShiftType(shiftType) || hourInRow === null) {
+            if (!isValidDate(date) || isInvalidShiftType(shiftType) || hourInRow == null) {
                 return;
             }
 
@@ -64,13 +64,14 @@ const Tlushim = (function() {
         const time = minutesToTime(totalTimeInMinutes);
         const div = document.createElement('div');
         const span = document.createElement('span');
+        const roundedHoursSupposedToBe = Math.round(hoursSupposedToBe);
 
         if (document.querySelector('.om_message')) return;
 
         div.classList.add('om_message');
         div.style.cssText = 'border: 1px solid; width: 80%; margin: 10px auto; line-height: 50px; font-size: 14px;font-family: Arial;';
 
-        if (time.hours < hoursSupposedToBe) {
+        if (time.hours < roundedHoursSupposedToBe) {
             div.style.cssText += 'color: #D8000C; background-color: #FFBABA;';
 
             if (time.hours > 0) {
@@ -80,14 +81,14 @@ const Tlushim = (function() {
 
             // Bad boy!
             // console.log("חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות");
-            span.innerText = "חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות";
+            span.innerText = "חסרות לך " + (roundedHoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות";
         }
         else {
             div.style.cssText += 'color: #4F8A10; background-color: #DFF2BF;';
 
             // Great!
             // console.log("יש לך " + (time.hours - hoursSupposedToBe) + " שעות עודף!");
-            span.innerText = "יש לך " + (-1 * (hoursSupposedToBe - time.hours)) + " שעות ו-" + time.minutes + " דקות עודף!";
+            span.innerText = "יש לך " + (-1 * (roundedHoursSupposedToBe - time.hours)) + " שעות ו-" + time.minutes + " דקות עודף!";
         }
 
         div.appendChild(span);
