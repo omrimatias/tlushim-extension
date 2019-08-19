@@ -32,7 +32,7 @@ const Tlushim = (function() {
                 const optionType = getOptionType(tr, getColumnIndexByText('סוג', loop));
 
                 if (isOutOfWork(shiftType, optionType) && loop === 1) {
-                    totalTimeInMinutes += (hourInRow * ONE_HOUR_IN_MINUTES);
+                    totalMinutesInRow += (hourInRow * ONE_HOUR_IN_MINUTES);
                     continue;
                 }
                 else if (isOutOfWork(shiftType, optionType)) {
@@ -71,6 +71,7 @@ const Tlushim = (function() {
      * Print function creates the colored div and puts the data inside
      */
     function printTime() {
+        let hoursDiff;
         const time = minutesToTime(totalTimeInMinutes);
         const div = document.createElement('div');
         const span = document.createElement('span');
@@ -82,6 +83,7 @@ const Tlushim = (function() {
         div.style.cssText = 'border: 1px solid; width: 80%; margin: 10px auto; line-height: 50px; font-size: 14px;font-family: Arial;';
 
         if (time.hours < roundedHoursSupposedToBe) {
+            // Bad boy!
             div.style.cssText += 'color: #D8000C; background-color: #FFBABA;';
 
             if (time.hours > 0) {
@@ -89,20 +91,32 @@ const Tlushim = (function() {
                 time.minutes = ONE_HOUR_IN_MINUTES - time.minutes;
             }
 
-            // Bad boy!
-            // console.log("חסרות לך " + (hoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות");
-            span.innerText = "חסרות לך " + (roundedHoursSupposedToBe - time.hours) + " שעות ו-" + time.minutes + " דקות";
+            hoursDiff = (roundedHoursSupposedToBe - time.hours);
+            span.innerText = "חסרות לך " + translateHoursToNormalHebrew(hoursDiff) + ' ' + translateMinutesToNormalHebrew(time.minutes);
         }
         else {
-            div.style.cssText += 'color: #4F8A10; background-color: #DFF2BF;';
+            // Great
+            hoursDiff = (-1 * (roundedHoursSupposedToBe - time.hours));
 
-            // Great!
-            // console.log("יש לך " + (time.hours - hoursSupposedToBe) + " שעות עודף!");
-            span.innerText = "יש לך " + (-1 * (roundedHoursSupposedToBe - time.hours)) + " שעות ו-" + time.minutes + " דקות עודף!";
+            div.style.cssText += 'color: #4F8A10; background-color: #DFF2BF;';
+            span.innerText = "יש לך " + translateHoursToNormalHebrew(hoursDiff) + ' ' + translateMinutesToNormalHebrew(time.minutes) + " עודף!";
         }
 
         div.appendChild(span);
         document.querySelector('div.atnd form').insertBefore(div, document.querySelector('table.atnd'));
+    }
+
+    function translateHoursToNormalHebrew(hours) {
+        if (hours === 1) return 'שעה';
+        if (hours === 2) return 'שעתיים';
+
+        return hours + ' שעות';
+    }
+
+    function translateMinutesToNormalHebrew(minutes) {
+        if (minutes === 1) return 'ודקה';
+
+        return " ו-" + minutes + ' דקות';
     }
 
     /**
