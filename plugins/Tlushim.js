@@ -14,26 +14,36 @@ const Tlushim = (function() {
 
         updatedTimestamp = getUpdatedTimeStamp();
 
-        document.querySelectorAll("table.atnd tr:not(.total)").forEach((tr) => {
+        document.querySelectorAll("table.atnd tr:not(.total)").forEach((tr, index) => {
             const date = getText(tr.querySelector("td:nth-child(1)"));
-            const enterTime = tr.querySelector("td:nth-child(3)");
-            const exitTime = tr.querySelector("td:nth-child(4)");
-            const optionType = getOptionType(tr, getColumnIndexByText('סוג', true));
-            const shiftType = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('משמרת', true) + ')'));
             const hourInRow = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('תקן') + ')'));
+            const shiftType = getText(tr.querySelector('td.atnd:nth-child(' + getColumnIndexByText('משמרת') + ')'));
+
+            if (index === 0) return;
 
             if (!isValidDate(date) || isInvalidShiftType(shiftType) || hourInRow == null) {
                 return;
             }
 
-            hoursSupposedToBe += Number(hourInRow);
+            let totalMinutesInRow = 0;
+            for (let loop = 1; loop <= 3; loop++) {
+                const enterTime = tr.querySelector("td:nth-child(" + getColumnIndexByText('כניסה', loop) + ")");
+                const exitTime = tr.querySelector("td:nth-child(" + getColumnIndexByText('יציאה', loop) + ")");
+                const optionType = getOptionType(tr, getColumnIndexByText('סוג', loop));
 
-            if (isOutOfWork(shiftType, optionType)) {
-                totalTimeInMinutes += (hourInRow * ONE_HOUR_IN_MINUTES);
-                return;
+                if (isOutOfWork(shiftType, optionType) && loop === 1) {
+                    totalTimeInMinutes += (hourInRow * ONE_HOUR_IN_MINUTES);
+                    continue;
+                }
+                else if (isOutOfWork(shiftType, optionType)) {
+                    continue;
+                }
+
+                totalMinutesInRow += summarizeMinutes(enterTime, exitTime);
             }
 
-            totalTimeInMinutes += summarizeMinutes(enterTime, exitTime);
+            totalTimeInMinutes += totalMinutesInRow;
+            hoursSupposedToBe += Number(hourInRow);
         });
 
         printTime();
@@ -222,8 +232,13 @@ const Tlushim = (function() {
     function getTotalMinutesInRow(enterHours, exitHours, enterMinutes, exitMinutes) {
         enterMinutes = Number(enterMinutes);
         exitMinutes = Number(exitMinutes);
+        exitHours = Number(exitHours);
+        enterHours = Number(enterHours);
 
-        const hoursDiff = Number(exitHours) - Number(enterHours);
+        exitHours = (exitHours === 0) ? 24 : exitHours;
+        enterHours = (enterHours === 0) ? 24 : enterHours;
+
+        const hoursDiff = exitHours - enterHours;
         const minutesDiff = exitMinutes - enterMinutes;
 
         return (minutesDiff + (hoursDiff * 60));
@@ -264,16 +279,20 @@ const Tlushim = (function() {
      * It helps to get the index of the corresponding text
      *
      * @param text
-     * @param getFirst
+     * @param byIndex - if null returns the last index
      * @returns {number}
      */
-    function getColumnIndexByText(text, getFirst) {
+    function getColumnIndexByText(text, byIndex) {
         let realIndex = 0;
-        let already = false;
+        let foundCount = 0;
+
         document.querySelectorAll('table.atnd tr.atnd:first-child th').forEach((th, index) => {
-            if (th.innerText === text && (!getFirst || (getFirst && !already))) {
-                realIndex = index;
-                already = true;
+            if (th.innerText === text) {
+                foundCount++;
+
+                if (!byIndex || (byIndex === foundCount)) {
+                    realIndex = index;
+                }
             }
         });
 
