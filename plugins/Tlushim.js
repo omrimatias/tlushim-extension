@@ -92,14 +92,14 @@ const Tlushim = (function() {
             }
 
             hoursDiff = (roundedHoursSupposedToBe - time.hours);
-            span.innerText = "חסרות לך " + translateHoursToNormalHebrew(hoursDiff) + ' ' + translateMinutesToNormalHebrew(time.minutes);
+            span.innerText = "חסרות לך " + translateHoursToNormalHebrew(hoursDiff) + ' ' + translateMinutesToNormalHebrew(time.minutes, hoursDiff);
         }
         else {
             // Great
             hoursDiff = (-1 * (roundedHoursSupposedToBe - time.hours));
 
             div.style.cssText += 'color: #4F8A10; background-color: #DFF2BF;';
-            span.innerText = "יש לך " + translateHoursToNormalHebrew(hoursDiff) + ' ' + translateMinutesToNormalHebrew(time.minutes) + " עודף!";
+            span.innerText = "יש לך " + translateHoursToNormalHebrew(hoursDiff) + ' ' + translateMinutesToNormalHebrew(time.minutes, hoursDiff) + " עודף!";
         }
 
         div.appendChild(span);
@@ -107,16 +107,24 @@ const Tlushim = (function() {
     }
 
     function translateHoursToNormalHebrew(hours) {
+        if (hours === 0) return '';
         if (hours === 1) return 'שעה';
         if (hours === 2) return 'שעתיים';
 
         return hours + ' שעות';
     }
 
-    function translateMinutesToNormalHebrew(minutes) {
-        if (minutes === 1) return 'ודקה';
+    function translateMinutesToNormalHebrew(minutes, hours) {
+        if (hours !== 0) {
+            if (minutes === 1) return 'ודקה';
 
-        return " ו-" + minutes + ' דקות';
+            return " ו-" + minutes + ' דקות';
+        }
+        else {
+            if (minutes === 1) return 'דקה';
+
+            return minutes + ' דקות';
+        }
     }
 
     /**
