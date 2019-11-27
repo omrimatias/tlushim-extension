@@ -10,7 +10,6 @@ const Tlushim = (function() {
      * and uses helping functions to parse and summarize the minutes calculation.
      */
     function install() {
-        let data = [['date', 'minutes', 'hour in row']];
         if (!isHoursTableExists()) return;
 
         updatedTimestamp = getUpdatedTimeStamp();
@@ -43,16 +42,9 @@ const Tlushim = (function() {
                 totalMinutesInRow += summarizeMinutes(enterTime, exitTime);
             }
 
-            data.push([date, totalMinutesInRow, hourInRow]);
-
             totalTimeInMinutes += totalMinutesInRow;
             hoursSupposedToBe += Number(hourInRow);
         });
-
-        console.table(data);
-
-        console.log('totalTimeInMinutes', totalTimeInMinutes);
-        console.log('hoursSupposedToBe', hoursSupposedToBe);
 
         printTime();
     }
