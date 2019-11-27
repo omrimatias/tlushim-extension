@@ -252,17 +252,35 @@ const Tlushim = (function() {
      * @returns {number}
      */
     function getTotalMinutesInRow(enterHours, exitHours, enterMinutes, exitMinutes) {
-        enterMinutes = Number(enterMinutes);
-        exitMinutes = Number(exitMinutes);
-        exitHours = Number(exitHours);
-        enterHours = Number(enterHours);
+        let hours = {
+            exit: Number(exitHours),
+            enter: Number(enterHours)
+        };
 
-        exitHours = (exitHours === 0) ? 24 : exitHours;
-        enterHours = (enterHours === 0) ? 24 : enterHours;
+        let minutes = {
+            exit: Number(exitMinutes),
+            enter: Number(enterMinutes)
+        };
 
-        const hoursDiff = exitHours - enterHours;
-        const minutesDiff = exitMinutes - enterMinutes;
+        hours.exit = (hours.exit === 0) ? 24 : hours.exit;
+        hours.enter = (hours.enter === 0) ? 24 : hours.enter;
 
+        let difference = calculateHoursToMinutes(hours, minutes);
+
+        // In case of late night work Ex: 00:00 - 03:00
+        if (difference < 0) {
+            hours.exit = (hours.exit === 24) ? 0 : hours.exit;
+            hours.enter = (hours.enter === 24) ? 0 : hours.enter;
+
+            difference = calculateHoursToMinutes(hours, minutes);
+        }
+
+        return difference;
+    }
+
+    function calculateHoursToMinutes(hours, minutes) {
+        const hoursDiff = hours.exit - hours.enter;
+        const minutesDiff = minutes.exit - minutes.enter;
         return (minutesDiff + (hoursDiff * 60));
     }
 
