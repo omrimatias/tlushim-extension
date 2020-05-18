@@ -1,4 +1,5 @@
 const Tlushim = (function() {
+    let totalPercentage = 0;
     let updatedTimestamp = 0;
     let hoursSupposedToBe = 0;
     let totalTimeInMinutes = 0;
@@ -10,6 +11,7 @@ const Tlushim = (function() {
      * and uses helping functions to parse and summarize the minutes calculation.
      */
     function install() {
+        let data = [['date', 'minutes', 'hour in row']];
         if (!isHoursTableExists()) return;
 
         updatedTimestamp = getUpdatedTimeStamp();
@@ -42,9 +44,19 @@ const Tlushim = (function() {
                 totalMinutesInRow += summarizeMinutes(enterTime, exitTime);
             }
 
+            data.push([date, totalMinutesInRow, hourInRow]);
+
             totalTimeInMinutes += totalMinutesInRow;
             hoursSupposedToBe += Number(hourInRow);
         });
+
+        // console.table(data);
+
+        const sumTotalTime = document.querySelector('.total .atnd:nth-child(' + getColumnIndexByText('תקן') + ')');
+        
+        // console.log('totalTimeInMinutes', totalTimeInMinutes);
+        // console.log('hoursSupposedToBe', (hoursSupposedToBe * ONE_HOUR_IN_MINUTES));
+        totalPercentage = (totalTimeInMinutes * 100) / (sumTotalTime.innerText * ONE_HOUR_IN_MINUTES);
 
         printTime();
     }
@@ -80,7 +92,7 @@ const Tlushim = (function() {
         if (document.querySelector('.om_message')) return;
 
         div.classList.add('om_message');
-        div.style.cssText = 'border: 1px solid; width: 80%; margin: 10px auto; line-height: 50px; font-size: 14px;font-family: Arial;';
+        div.style.cssText = 'border: 1px solid; width: 80%; margin: 10px auto; line-height: 22px; padding: 10px 0; font-size: 14px;font-family: Arial;';
 
         if (time.hours < roundedHoursSupposedToBe) {
             // Bad boy!
@@ -101,6 +113,8 @@ const Tlushim = (function() {
             div.style.cssText += 'color: #4F8A10; background-color: #DFF2BF;';
             span.innerText = "יש לך " + translateHoursToNormalHebrew(hoursDiff) + ' ' + translateMinutesToNormalHebrew(time.minutes, hoursDiff) + " עודף!";
         }
+
+        span.innerHTML += `<br>אחוז משרה: ${totalPercentage.toFixed(2)}%`;
 
         div.appendChild(span);
         document.querySelector('div.atnd form').insertBefore(div, document.querySelector('table.atnd'));
