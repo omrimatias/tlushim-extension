@@ -2,6 +2,7 @@ const Tlushim = (function() {
     let totalPercentage = 0;
     let updatedTimestamp = 0;
     let hoursSupposedToBe = 0;
+    let showPercentage = true;
     let totalTimeInMinutes = 0;
     const ONE_HOUR_IN_MINUTES = 60;
 
@@ -10,7 +11,13 @@ const Tlushim = (function() {
      * Here it runs in a loop over all the lines in the table
      * and uses helping functions to parse and summarize the minutes calculation.
      */
-    function install() {
+    function install(settings) {
+        totalPercentage = 0;
+        updatedTimestamp = 0;
+        hoursSupposedToBe = 0;
+        totalTimeInMinutes = 0;
+        showPercentage = settings.showPercentage;
+        
         let data = [['date', 'minutes', 'hour in row']];
         if (!isHoursTableExists()) return;
 
@@ -89,7 +96,9 @@ const Tlushim = (function() {
         const span = document.createElement('span');
         const roundedHoursSupposedToBe = Math.round(hoursSupposedToBe);
 
-        if (document.querySelector('.om_message')) return;
+        if (document.querySelector('.om_message')) {
+            document.querySelector('.om_message').remove();
+        }
 
         div.classList.add('om_message');
         div.style.cssText = 'border: 1px solid; width: 80%; margin: 10px auto; line-height: 22px; padding: 10px 0; font-size: 14px;font-family: Arial;';
@@ -114,7 +123,9 @@ const Tlushim = (function() {
             span.innerText = "יש לך " + translateHoursToNormalHebrew(hoursDiff) + ' ' + translateMinutesToNormalHebrew(time.minutes, hoursDiff) + " עודף!";
         }
 
-        span.innerHTML += `<br>אחוז משרה: ${totalPercentage.toFixed(2)}%`;
+        if(showPercentage) {
+            span.innerHTML += `<br>אחוז משרה מתחילת החודש: ${totalPercentage.toFixed(2)}%`;
+        }
 
         div.appendChild(span);
         document.querySelector('div.atnd form').insertBefore(div, document.querySelector('table.atnd'));
@@ -362,7 +373,31 @@ const Tlushim = (function() {
         return (document.querySelector("table.atnd"));
     }
 
+    function toggle() {
+        const divMessage = document.querySelector('.om_message');
+        if (divMessage) {
+            divMessage.remove();
+        }
+        else {
+            chrome.runtime.sendMessage({method: "getItem", key: 'showPercentage'}, function (response) {
+                install({
+                    showPercentage: response['showPercentage'] === undefined || response['showPercentage'].value
+                });
+            });
+        }
+    }
+
+    function refresh() {
+        chrome.runtime.sendMessage({method: "getItem", key: 'showPercentage'}, function (response) {
+            install({
+                showPercentage: response['showPercentage'] === undefined || response['showPercentage'].value
+            });
+        });
+    }
+
     return {
-        install: install
+        toggle: toggle,
+        install: install,
+        refresh: refresh,
     }
 })();

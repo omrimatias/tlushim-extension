@@ -3,21 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Tlushim</title>
-    <style>
-        html, body {
-            width: 200px;
-            margin: 2px 0 7px;
-        }
-        table {
-            width: 100%;
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="popup.css" />
+    <script type="text/javascript" src="popup.js"></script>
 </head>
 <body>
     <table>
         <tr>
-            <td colspan="2" >Created by Omri Matias</td>
+            <td>Plugin On/Off:</td>
+            <td>
+                <input class="_tlushimPopupToggle" title="On/Off" type="checkbox" id="status" />
+                <label for="status"><i></i></label>
+            </td>
+        </tr>
+        <tr>
+            <td>Show percentage:</td>
+            <td>
+                <input class="_tlushimPopupToggle" title="showPercentage" type="checkbox" id="percentage" />
+                <label for="percentage"><i></i></label>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" class="small_text copyrights">Created by Omri Matias</td>
         </tr>
     </table>
 </body>
