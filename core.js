@@ -15,11 +15,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 });
 
 if (url.indexOf('www.tlushim.co.il') !== -1) {
-    chrome.runtime.sendMessage({method: "getItem", key: ['On/Off', 'showPercentage']}, function (response) {
+    chrome.runtime.sendMessage({method: "getItem", key: ['On/Off', 'showPercentage', 'showTimeOnBlank']}, function (response) {
         
         if (response['On/Off'] === undefined || response['On/Off'].value)
             Tlushim.install({
-                showPercentage: response['showPercentage'] === undefined || response['showPercentage'].value
+                showPercentage: response['showPercentage'] === undefined || response['showPercentage'].value,
+                showTimeOnBlank: response['showTimeOnBlank'] === undefined || response['showTimeOnBlank'].value,
             });
     });
 }

@@ -3,6 +3,7 @@ const Tlushim = (function() {
     let updatedTimestamp = 0;
     let hoursSupposedToBe = 0;
     let showPercentage = true;
+    let showTimeOnBlank = true;
     let totalTimeInMinutes = 0;
     const ONE_HOUR_IN_MINUTES = 60;
 
@@ -17,6 +18,7 @@ const Tlushim = (function() {
         hoursSupposedToBe = 0;
         totalTimeInMinutes = 0;
         showPercentage = settings.showPercentage;
+        showTimeOnBlank = settings.showTimeOnBlank;
         
         let data = [['date', 'minutes', 'hour in row']];
         if (!isHoursTableExists()) return;
@@ -38,6 +40,7 @@ const Tlushim = (function() {
             for (let loop = 1; loop <= 3; loop++) {
                 const enterTime = tr.querySelector("td:nth-child(" + getColumnIndexByText('כניסה', loop) + ")");
                 const exitTime = tr.querySelector("td:nth-child(" + getColumnIndexByText('יציאה', loop) + ")");
+                const duration = tr.querySelector("td:nth-child(" + getColumnIndexByText('משך', loop) + ")");
                 const optionType = getOptionType(tr, getColumnIndexByText('סוג', loop));
 
                 if (isOutOfWork(shiftType, optionType) && loop === 1) {
@@ -48,7 +51,18 @@ const Tlushim = (function() {
                     continue;
                 }
 
-                totalMinutesInRow += summarizeMinutes(enterTime, exitTime);
+                const summerizedMinutes = summarizeMinutes(enterTime, exitTime);
+                if (showTimeOnBlank && !duration.innerText && summerizedMinutes !== 0) {
+                    const time = minutesToTime(summerizedMinutes);
+                    duration.innerText = `${time.hours < 10 ? `0${time.hours}` : time.hours}:${time.minutes < 10 ? `0${time.minutes}` : time.minutes}`;
+                    duration.classList.add('om_duration');
+                }
+                else if (!showTimeOnBlank && duration.classList.contains('om_duration')) {
+                    duration.classList.remove('om_duration');
+                    duration.innerText = '';
+                }
+
+                totalMinutesInRow += summerizedMinutes;
             }
 
             data.push([date, totalMinutesInRow, hourInRow]);
@@ -379,18 +393,20 @@ const Tlushim = (function() {
             divMessage.remove();
         }
         else {
-            chrome.runtime.sendMessage({method: "getItem", key: 'showPercentage'}, function (response) {
+            chrome.runtime.sendMessage({method: "getItem", key: ['showPercentage', 'showTimeOnBlank']}, function (response) {
                 install({
-                    showPercentage: response['showPercentage'] === undefined || response['showPercentage'].value
+                    showPercentage: response['showPercentage'] === undefined || response['showPercentage'].value,
+                    showTimeOnBlank: response['showTimeOnBlank'] === undefined || response['showTimeOnBlank'].value,
                 });
             });
         }
     }
 
     function refresh() {
-        chrome.runtime.sendMessage({method: "getItem", key: 'showPercentage'}, function (response) {
+        chrome.runtime.sendMessage({method: "getItem", key: ['showPercentage', 'showTimeOnBlank']}, function (response) {
             install({
-                showPercentage: response['showPercentage'] === undefined || response['showPercentage'].value
+                showPercentage: response['showPercentage'] === undefined || response['showPercentage'].value,
+                showTimeOnBlank: response['showTimeOnBlank'] === undefined || response['showTimeOnBlank'].value,
             });
         });
     }

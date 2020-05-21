@@ -1,7 +1,7 @@
 {
   "author": "Omri Matias",
   "name": "Tlushim",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Tlushim time counter",
   "permissions": [
     "storage",
@@ -21,6 +21,7 @@
         "http://www.tlushim.co.il/*",
         "https://www.tlushim.co.il/*"
       ],
+      "css": ["default.css"],
       "js": [
         "plugins/Tlushim.js",
         "core.js"

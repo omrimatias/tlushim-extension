@@ -7,6 +7,9 @@ const popUp = (function() {
         'showPercentage': {
             value: true,
         },
+        'showTimeOnBlank': {
+            value: true,
+        },
     }
 
     /**
@@ -32,7 +35,7 @@ const popUp = (function() {
                 if (e.target.title === 'On/Off' && bg)
                     bg.Background.coreFunctions("toggleExtension");
                     
-                if (e.target.title === 'showPercentage' && bg) {
+                if (['showPercentage', 'showTimeOnBlank'].includes(e.target.title) && bg) {
                     bg.Background.coreFunctions("refreshExtension");
                 }
             }
