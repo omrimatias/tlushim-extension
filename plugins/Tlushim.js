@@ -19,7 +19,7 @@ const Tlushim = (function() {
         totalTimeInMinutes = 0;
         showPercentage = settings.showPercentage;
         showTimeOnBlank = settings.showTimeOnBlank;
-        
+
         let data = [['date', 'minutes', 'hour in row']];
         if (!isHoursTableExists()) return;
 
@@ -74,7 +74,7 @@ const Tlushim = (function() {
         // console.table(data);
 
         const sumTotalTime = document.querySelector('.total .atnd:nth-child(' + getColumnIndexByText('תקן') + ')');
-        
+
         // console.log('totalTimeInMinutes', totalTimeInMinutes);
         // console.log('hoursSupposedToBe', (hoursSupposedToBe * ONE_HOUR_IN_MINUTES));
         totalPercentage = (totalTimeInMinutes * 100) / (sumTotalTime.innerText * ONE_HOUR_IN_MINUTES);
@@ -318,6 +318,8 @@ const Tlushim = (function() {
     }
 
     function calculateHoursToMinutes(hours, minutes) {
+        if (hours.exit < hours.enter) hours.exit += 24;
+
         const hoursDiff = hours.exit - hours.enter;
         const minutesDiff = minutes.exit - minutes.enter;
         return (minutesDiff + (hoursDiff * 60));
