@@ -333,7 +333,7 @@ const Tlushim = (function() {
      * @returns {boolean}
      */
     function isOutOfWork(shiftType, optionType) {
-        return (shiftType !== '' && ['מילואים', 'מחלה', 'חופשה'].indexOf(optionType) !== -1);
+        return (shiftType !== '' && ['מילואים', 'מחלה', 'חופשה', 'חופש ע"ח המעסיק', 'בידוד'].indexOf(optionType) !== -1);
     }
 
     /**
