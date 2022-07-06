@@ -1,10 +1,12 @@
 const Tlushim = (function() {
+    let names = {};
     let totalPercentage = 0;
     let updatedTimestamp = 0;
     let hoursSupposedToBe = 0;
     let showPercentage = true;
     let showTimeOnBlank = true;
     let totalTimeInMinutes = 0;
+    const ulSearchBarDefaultStyle = 'z-index: 9999; position: absolute; width: 220px; top: 100%; padding: 0; margin: 0; list-style: none; background: #fff; max-height: 200px; overflow: scroll; border: 1px #ccc solid; border-top: 0; border-radius: 0 0 5px 5px;';
     const ONE_HOUR_IN_MINUTES = 60;
 
     /**
@@ -24,6 +26,10 @@ const Tlushim = (function() {
         if (!isHoursTableExists()) return;
 
         updatedTimestamp = getUpdatedTimeStamp();
+        const menuLinks = document.querySelector('.menu_links');
+
+        if (menuLinks)
+            appendSearchInput(menuLinks);
 
         document.querySelectorAll("table.atnd tr:not(.total)").forEach((tr, index) => {
             const date = getText(tr.querySelector("td:nth-child(1)"));
@@ -51,9 +57,9 @@ const Tlushim = (function() {
                     continue;
                 }
 
-                const summerizedMinutes = summarizeMinutes(enterTime, exitTime);
-                if (showTimeOnBlank && !duration.innerText && summerizedMinutes !== 0) {
-                    const time = minutesToTime(summerizedMinutes);
+                const summarizedMinutes = summarizeMinutes(enterTime, exitTime);
+                if (showTimeOnBlank && !duration.innerText && summarizedMinutes !== 0) {
+                    const time = minutesToTime(summarizedMinutes);
                     duration.innerText = `${time.hours < 10 ? `0${time.hours}` : time.hours}:${time.minutes < 10 ? `0${time.minutes}` : time.minutes}`;
                     duration.classList.add('om_duration');
                 }
@@ -62,7 +68,7 @@ const Tlushim = (function() {
                     duration.innerText = '';
                 }
 
-                totalMinutesInRow += summerizedMinutes;
+                totalMinutesInRow += summarizedMinutes;
             }
 
             data.push([date, totalMinutesInRow, hourInRow]);
@@ -70,6 +76,7 @@ const Tlushim = (function() {
             totalTimeInMinutes += totalMinutesInRow;
             hoursSupposedToBe += Number(hourInRow);
         });
+        document.addEventListener('click', handleULClose);
 
         // console.table(data);
 
@@ -411,6 +418,83 @@ const Tlushim = (function() {
                 showTimeOnBlank: response['showTimeOnBlank'] === undefined || response['showTimeOnBlank'].value,
             });
         });
+    }
+
+    function appendSearchInput(menuLinks) {
+        const ul = document.createElement('ul');
+        const div = document.createElement('div');
+        const input = document.createElement('input');
+        const allTaz = document.getElementById('worker_list');
+
+        ul.style.cssText = `display: none; ${ulSearchBarDefaultStyle}`;
+        div.style.cssText = 'display: inline-block; position: relative; width: 220px;';
+        input.style.cssText = 'height: 20px; width: 220px;';
+        ul.id = 'ulSearchByName';
+        ul.className = 'ulSearch';
+        input.id = 'inputSearchByName';
+
+        input.addEventListener('keyup', filterSearch);
+
+        for (const el of allTaz.children) {
+            if (el.value) {
+                names[el.value] = {};
+                names[el.value]['name'] = el.text.replace('&nbsp;', ' ');
+                names[el.value]['tz'] = el.value;
+            }
+        }
+
+        div.appendChild(ul);
+        div.appendChild(input);
+        menuLinks.appendChild(div);
+    }
+
+    function filterSearch() {
+        const ul = document.getElementById('ulSearchByName');
+        const inputSearch = document.getElementById('inputSearchByName');
+        const value = inputSearch.value;
+        const filteredNames = getTzByName(value);
+        ul.style.cssText = `display: block; ${ulSearchBarDefaultStyle}`;
+        ul.innerHTML = '';
+
+        filteredNames.forEach((key, index) => {
+            const li = document.createElement('li');
+            let liBasicCSS = 'cursor: pointer; height: 17px; padding: 5px;';
+            if (index !== (filteredNames.length-1)) {
+                liBasicCSS += 'border-bottom: 1px #c8c8c8 solid;';
+            }
+            li.textContent = names[key].name;
+            li.style.cssText = liBasicCSS;
+            li.onmouseenter = (e) => { e.target.style.cssText = liBasicCSS + 'background: #ccc'; }
+            li.onmouseleave = (e) => { e.target.style.cssText = liBasicCSS + 'background: #fff'; }
+            li.onclick = () => { moveToTz(key) };
+            ul.appendChild(li);
+        });
+    }
+
+    function getTzByName(value) {
+        return Object.keys(names).filter(key => names[key].name.indexOf(value) !== -1);
+    }
+
+    function handleULClose(e) {
+        const ul = document.getElementById('ulSearchByName');
+        if (e.target.className !== 'ulSearch') {
+            ul.style.cssText = `display: none; ${ulSearchBarDefaultStyle}`;
+        }
+    }
+
+    function moveToTz(tz) {
+        const month = getParameterByName('month');
+
+        window.location.href = 'https://www.tlushim.co.il/main.php?op=atnd&tz=' + tz + (month ? '&month=' + month : '');
+    }
+
+    function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
 
     return {
